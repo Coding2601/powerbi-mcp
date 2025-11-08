@@ -2,6 +2,7 @@ namespace PowerBI_MCP.Utils
 {
     public static class AppConfig
     {
+        public static ConfigurationManager configuration { get; set; } = new ConfigurationManager();
         private static readonly string RoamingDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         public static string LocalDir { get; } = RoamingDir + "\\certy-fast";
         public static string duplicateReportZipDirectory { get; } = RoamingDir + "\\certy-fast\\reportZIP";

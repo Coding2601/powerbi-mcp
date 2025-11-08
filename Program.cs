@@ -17,6 +17,7 @@ builder.Services.AddScoped<IConnectionService, ConnectionService>();
 
 builder.Services.AddScoped<ConnectionHandler>();
 builder.Services.AddScoped<FileHandler>();
+builder.Services.AddScoped<DocumentationHandler>();
 
 Env.Load();
 

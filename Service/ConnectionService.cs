@@ -10,12 +10,17 @@ namespace PowerBI_MCP.Service
     public class ConnectionService : IConnectionService
     {
         private readonly ConnectionHandler _connectionHandler;
-        private readonly FileHandler _fileHandler = new FileHandler();
+        private readonly FileHandler _fileHandler;
+        private readonly DocumentationHandler _documentationHandler;
 
-        public ConnectionService(ConnectionHandler connectionHandler, FileHandler fileHandler)
+        public ConnectionService(
+            ConnectionHandler connectionHandler,
+            FileHandler fileHandler,
+            DocumentationHandler documentationHandler)
         {
             _connectionHandler = connectionHandler;
             _fileHandler = fileHandler;
+            _documentationHandler = documentationHandler;
         }
 
         public bool ConnectReport(string reportName, string reportPath)
@@ -100,6 +105,7 @@ namespace PowerBI_MCP.Service
                     DbName = db,
                     dbStatic = database
                 });
+                _documentationHandler.GenerateModelDocumentation(database);
                 return true;
             }
             catch (Exception ex)
