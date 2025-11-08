@@ -4,11 +4,8 @@ using PowerBI_MCP.DTO;
 using PowerBI_MCP.Models;
 using PowerBI_MCP.Utils;
 using Microsoft.AnalysisServices.Tabular;
-using System;
-using System.IO;
-using Newtonsoft.Json;
 using System.Text.Json;
-using System.Threading.Tasks;
+using PowerBI_MCP.Utils.Cache;
 
 namespace PowerBI_MCP.Service
 {
@@ -60,23 +57,20 @@ namespace PowerBI_MCP.Service
                     ReportPath = extractionPath,
                     ReportType = isPBIR ? ReportType.PBIR : ReportType.PBIX
                 });
-                ReportDocumentation reportDoc = _documentationHandler.GenerateReportDocumentation(
-                                                    isPBIR, extractionPath, reportId
-                                                );
-                string filePath = Path.Combine(AppConfig.duplicateReportZipDirectory, reportId + ".json");
-
-                // Serialize object to JSON (with indented formatting)
-                var options = new JsonSerializerOptions
+                
+                ReportDocumentation reportDoc = _documentationHandler.GenerateReportDocumentation(isPBIR, extractionPath, reportId);
+                if (reportDoc != null)
                 {
-                    WriteIndented = true
-                };
-
+                    Console.WriteLine($"writing report doc into cache {reportId}");
+                    ReportCache.Set(reportId, reportDoc);
+                }
+                
+                string filePath = Path.Combine(AppConfig.duplicateReportZipDirectory, reportId + ".json");
+                var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = System.Text.Json.JsonSerializer.Serialize(reportDoc, options);
-
-                // Save JSON to file asynchronously
                 File.WriteAllTextAsync(filePath, json);
-
                 Console.WriteLine($"JSON saved to: {filePath}");
+                
                 return true;
             }
             catch (Exception ex)
@@ -127,23 +121,22 @@ namespace PowerBI_MCP.Service
                     DbName = db,
                     dbStatic = database
                 });
+                
                 ModelDocumentation modelDoc = _documentationHandler.GenerateModelDocumentation(database);
+                if (modelDoc != null)
+                {
+                    Console.WriteLine($"writing model doc into cache {modelId}");
+                    ModelCache.Set(modelId, modelDoc);
+                }
+
                 string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory, modelId);
                 Directory.CreateDirectory(extractionPath);
                 string filePath = Path.Combine(extractionPath, modelId + ".json");
-
-                // Serialize object to JSON (with indented formatting)
-                var options = new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                };
-
+                var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = System.Text.Json.JsonSerializer.Serialize(modelDoc, options);
-
-                // Save JSON to file asynchronously
                 File.WriteAllTextAsync(filePath, json);
-
                 Console.WriteLine($"JSON saved to: {filePath}");
+                
                 return true;
             }
             catch (Exception ex)
