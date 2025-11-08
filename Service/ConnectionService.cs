@@ -4,6 +4,11 @@ using PowerBI_MCP.DTO;
 using PowerBI_MCP.Models;
 using PowerBI_MCP.Utils;
 using Microsoft.AnalysisServices.Tabular;
+using System;
+using System.IO;
+using Newtonsoft.Json;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace PowerBI_MCP.Service
 {
@@ -45,16 +50,33 @@ namespace PowerBI_MCP.Service
                 _fileHandler.ExtractZipFile(fullpath, extractionPath);
 
                 bool isPBIR = false;
-                if (_connectionHandler.CheckValidPBIR(fullpath))
+                if (_connectionHandler.CheckValidPBIR(extractionPath))
                     isPBIR = true;
 
                 ArtifactModel.Reports.Add(new ReportModel
                 {
                     ReportId = reportId,
                     ReportName = reportName,
-                    ReportPath = fullpath,
+                    ReportPath = extractionPath,
                     ReportType = isPBIR ? ReportType.PBIR : ReportType.PBIX
                 });
+                ReportDocumentation reportDoc = _documentationHandler.GenerateReportDocumentation(
+                                                    isPBIR, extractionPath, reportId
+                                                );
+                string filePath = Path.Combine(AppConfig.duplicateReportZipDirectory, reportId + ".json");
+
+                // Serialize object to JSON (with indented formatting)
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+
+                string json = System.Text.Json.JsonSerializer.Serialize(reportDoc, options);
+
+                // Save JSON to file asynchronously
+                File.WriteAllTextAsync(filePath, json);
+
+                Console.WriteLine($"JSON saved to: {filePath}");
                 return true;
             }
             catch (Exception ex)
@@ -105,7 +127,23 @@ namespace PowerBI_MCP.Service
                     DbName = db,
                     dbStatic = database
                 });
-                _documentationHandler.GenerateModelDocumentation(database);
+                ModelDocumentation modelDoc = _documentationHandler.GenerateModelDocumentation(database);
+                string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory, modelId);
+                Directory.CreateDirectory(extractionPath);
+                string filePath = Path.Combine(extractionPath, modelId + ".json");
+
+                // Serialize object to JSON (with indented formatting)
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+
+                string json = System.Text.Json.JsonSerializer.Serialize(modelDoc, options);
+
+                // Save JSON to file asynchronously
+                File.WriteAllTextAsync(filePath, json);
+
+                Console.WriteLine($"JSON saved to: {filePath}");
                 return true;
             }
             catch (Exception ex)

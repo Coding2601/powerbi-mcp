@@ -84,10 +84,21 @@ namespace PowerBI_MCP.Handlers
         public static JObject? ReadJsonFile(string filePath, Encoding encoding)
         {
             if (File.Exists(filePath) == false)
+            {
+                // throw new Exception($"{filePath} doesn't exists");
                 return null;
+            }
             string jsonString = File.ReadAllText(filePath, encoding);
             JObject jsonContent = JObject.Parse(jsonString);
             return jsonContent;
+        }
+
+        public static JObject? ReadLayout(string filePath)
+        {
+            string content = File.ReadAllText(filePath, Encoding.Unicode);
+            var json = JObject.Parse(content);
+            // File.WriteAllText(AppConfig.duplicateReportZipDirectory + "\\report.json", json.ToString());
+            return json;
         }
 
         /// <summary>
@@ -104,7 +115,7 @@ namespace PowerBI_MCP.Handlers
         /// Formats a list of conditional formatting summaries as a string.
         /// </summary>
         /// <param name="formattingSummaryList">List of summaries.</param>
-        /// <returns>Formatted string.</returns>
+        /// /// <returns>Formatted string.</returns>
         public static string FormateConditionalFormattingSummaryInStr(List<ConditionalFormattingSummary>? formattingSummaryList)
         {
             if (formattingSummaryList == null)
