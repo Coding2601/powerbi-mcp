@@ -54,7 +54,7 @@ namespace PowerBI_MCP.Service
                 {
                     ReportId = reportId,
                     ReportName = reportName,
-                    ReportPath = extractionPath,
+                    ReportPath = reportPath,
                     ReportType = isPBIR ? ReportType.PBIR : ReportType.PBIX
                 });
                 

@@ -101,6 +101,16 @@ namespace PowerBI_MCP.Handlers
             return json;
         }
 
+        public static List<ReportModel> GetReportByName(string reportName)
+        {
+            return ArtifactModel.Reports.FindAll(report => report.ReportName == reportName);
+        }
+
+        public static List<DatasetModel> GetModelByName(string datasetName)
+        {
+            return ArtifactModel.Datasets.FindAll(dataset => dataset.DatasetName == datasetName);
+        }
+
         /// <summary>
         /// Converts BIM JSON to a Tabular Database object.
         /// </summary>
