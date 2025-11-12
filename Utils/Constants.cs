@@ -8,10 +8,11 @@ namespace PowerBI_MCP.Utils
         public static string duplicateReportZipDirectory { get; } = RoamingDir + "\\certy-fast\\reportZIP";
         public static string SuppressedInsightsFilesDirectory { get; } = RoamingDir + "\\certy-fast\\suppressedInsights";
         public static string SuppressedKeyJoinStr = "_SUPPRESSED_KEY_JOIN_";
+        public static string IssueRowIgnoreKeyJoinSeparator = "__|__Issue_Row_Ignore_Join_Separator__|__";
         public static string ModelBimDirectory { get; } = RoamingDir + "\\certy-fast\\modelBim";
         public static string duplicateReportModelZipDirectory { get; } = RoamingDir + "\\certy-fast\\modelZIP";
         public static string crashLog { get; } = RoamingDir + "\\certy-fast\\CrashLog.txt";
-        
+        public static string ConnectionString { get; } = $"{RoamingDir}\\certy-fast\\CertyfastDB.sqlite;Mode=ReadWriteCreate;";
         public static string whizUpdaterDirectory { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "certy-fast-updater");
         public static string localCacheDir1 { get; } = RoamingDir + "\\certy-fast\\Cache";
         public static string localCacheDir2 { get; } = RoamingDir + "\\certy-fast\\Code Cache";
