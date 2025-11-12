@@ -3,6 +3,8 @@ using PowerBI_MCP.Entities;
 using PowerBI_MCP.Handlers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Data.SQLite;
+using PowerBI_MCP.Utils;
 
 namespace PowerBI_MCP.Repositories
 {
@@ -11,11 +13,41 @@ namespace PowerBI_MCP.Repositories
         private static readonly Lazy<IssueMetadataRepo> _instance = new Lazy<IssueMetadataRepo>(() => new IssueMetadataRepo());
         public static IssueMetadataRepo Instance => _instance.Value;
 
-        internal List<IssueSection> GetIssueSection(){
-            string query = @$"SELECT * from [CertyFAST].[IssueSection]";
+        internal List<IssueSection> GetIssueSection()
+        {
+            string query = @$"SELECT * from exported_data";
             JArray? issuesMetadataJson = SQLHandler.RunReadQuery(query);
-            if(issuesMetadataJson==null) return null;
-            return JsonConvert.DeserializeObject<List<IssueSection>>(issuesMetadataJson?.ToString() ??"[]") ?? [];
+            if (issuesMetadataJson == null) return null;
+            return JsonConvert.DeserializeObject<List<IssueSection>>(issuesMetadataJson?.ToString() ?? "[]") ?? [];
+        }
+        
+        internal bool Check()
+        {
+                string connectionString = AppConfig.ConnectionString;
+            Console.WriteLine("Connection String: " + connectionString);    
+            using (var connection = new SQLiteConnection(connectionString))
+            {
+                    try
+                    {
+                        connection.Open();
+
+                        if (connection.State == System.Data.ConnectionState.Open)
+                        {
+                            Console.WriteLine("Connection is open and working!");
+                            return true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Connection failed or is closed.");
+                            return false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error: " + ex.Message);
+                        return false;
+                    }
+            }
         }
 
         internal List<IssueRulesMetadata> GetAllIssuesMetadata()
