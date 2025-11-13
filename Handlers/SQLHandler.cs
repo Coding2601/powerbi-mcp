@@ -50,5 +50,81 @@ namespace PowerBI_MCP.Handlers
                 return null;
             }
         }
+
+        public static bool CheckTableExists(string tableName)
+        {
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string sql = "SELECT name FROM sqlite_master WHERE type='table' AND name=@tableName;";
+
+                using (var command = new SqliteCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@tableName", tableName);
+
+                    var result = command.ExecuteScalar();
+
+                    if (result != null)
+                    {
+                        Console.WriteLine($"✅ Table '{tableName}' exists.");
+                        return true;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"❌ Table '{tableName}' does not exist.");
+                        return false;
+                    }
+                }
+            }
+        }
+
+        public static int RunCreateQuery(string query)
+        {
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+
+                using var command = new SqliteCommand(query, connection);
+                int rowsAffected = command.ExecuteNonQuery();
+
+                return rowsAffected;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed Query:\n" + query);
+                GlobalHandler.WriteCrashLog(
+                    "Failed Query:\n" + query + "\n" + ex.ToString(),
+                    null,
+                    "SQLite Create Function Failure"
+                );
+                return -1;
+            }
+        }
+    
+        public static int RunInsertQuery(string query)
+        {
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+
+                using var command = new SqliteCommand(query, connection);
+                int rowsAffected = command.ExecuteNonQuery();
+
+                return rowsAffected;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed Query:\n" + query);
+                GlobalHandler.WriteCrashLog(
+                    "Failed Query:\n" + query + "\n" + ex.ToString(),
+                    null,
+                    "SQLite Insert Function Failure"
+                );
+                return -1;
+            }
+        }
     }
 }
