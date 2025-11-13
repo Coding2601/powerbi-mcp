@@ -45,16 +45,16 @@ namespace PowerBI_MCP.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetIssuesData([FromQuery] string workspaceId, [FromQuery] string artifactId, [FromQuery] string artifactType)
+        public IActionResult GetIssuesData([FromQuery] string artifactName, [FromQuery] string artifactType)
         {
-            if (string.IsNullOrEmpty(workspaceId) || string.IsNullOrEmpty(artifactId) || string.IsNullOrEmpty(artifactType))
+            if (string.IsNullOrEmpty(artifactName) || string.IsNullOrEmpty(artifactType))
             {
-                return BadRequest("workspaceId and artifactId are required.");
+                return BadRequest("artifactName and artifactType are required.");
             }
             try
             {
                 // string userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "";
-                var data = _issueService.GetData(workspaceId, artifactId, artifactType, "userEmail");
+                var data = _issueService.GetData(artifactName, artifactType, "userEmail");
 
                 if (data == null)
                 {
@@ -96,16 +96,16 @@ namespace PowerBI_MCP.Controllers
         // }
 
         [HttpGet]
-        public IActionResult GetAlignmentIssues([FromQuery] string workspaceId, [FromQuery] string artifactId, [FromQuery] string? spacing)
+        public IActionResult GetAlignmentIssues([FromQuery] string reportName, [FromQuery] string? spacing)
         {
-            if (string.IsNullOrEmpty(workspaceId) || string.IsNullOrEmpty(artifactId))
+            if (string.IsNullOrEmpty(reportName))
             {
-                return BadRequest("Please provide valid workspaceId, artifactId, ruleId and spacing.");
+                return BadRequest("Please provide valid reportName and spacing.");
             }
             try
             {
                 // string userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "";
-                var data =  _issueService.GetAlignmentIssues(workspaceId, artifactId, spacing, "userEmail");
+                var data =  _issueService.GetAlignmentIssues(reportName, spacing, "userEmail");
 
                 if (data == null)
                 {
