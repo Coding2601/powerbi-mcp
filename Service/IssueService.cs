@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 using PowerBI_MCP.Interfaces;
 using PowerBI_MCP.Service.IssueDataGenerator;
 using PowerBI_MCP.Models;
+using PowerBI_MCP.Utils;
+using System.Text.Json;
 
 namespace PowerBI_MCP.Service
 {
@@ -103,8 +105,18 @@ namespace PowerBI_MCP.Service
             return new { result, modelDocs };
         }
         
-        public object GetAlignmentIssues(string workspaceId, string artifactId, string? spacing, string userEmail)
+        public object GetAlignmentIssues(string reportName, string? spacing, string userEmail)
         {
+            string workspaceId = "", artifactId = "";
+            List<ReportModel> reports = GlobalHandler.GetReportByName(reportName);
+            if (reports.Count == 0)
+                throw new Exception($"report not found, please connect this report");
+            if (reports.Count > 1)
+            {
+                string reportPaths = string.Join(", ", reports.Select(r => r.ReportPath));
+                throw new Exception($"There are more than one report with the name '{reportName}'. Report paths: {reportPaths}");
+            }
+            artifactId = reports[0].ReportId;
             ReportDocumentation? reportDoc = ReportCache.Get(GlobalHandler.GetArtifactCacheKey(userEmail, workspaceId.ToString(), artifactId));
             if (reportDoc == null) throw new ErrorDTO("No Documentation found for Report " + artifactId);
             List<IssueRulesMetadata> issueRulesMetadata = IssueMetadataRepo.Instance.GetVisualAlignmentRelatedIssueMetadata();
@@ -132,15 +144,46 @@ namespace PowerBI_MCP.Service
                 dto.MaxIssuable = singleIssueRuleData?.MaxIssuable ?? 0;
                 issues.Add(dto);
             }
+            string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory);
+            Directory.CreateDirectory(extractionPath);
+            string filePath = Path.Combine(extractionPath, "alignment.json");
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = System.Text.Json.JsonSerializer.Serialize(issues, options);
+            File.WriteAllTextAsync(filePath, json);
+            Console.WriteLine($"JSON saved to: {filePath}");
             return issues;
         }
 
-        public AllIssueRuleData GetData(string workspaceId, string artifactId, string artifactType, string userEmail)
+        public AllIssueRuleData GetData(string artifactName, string artifactType, string userEmail)
         {
-            string key = GlobalHandler.GetArtifactCacheKey(userEmail, workspaceId, artifactId);
-            Console.WriteLine($"\n[DEBUG] [IssueService] GetData called:");
-            Console.WriteLine($"  Cache Key: {key}");
-            Console.WriteLine($"  WorkspaceId: {workspaceId}, ArtifactId: {artifactId}, ArtifactType: {artifactType}");
+            string artifactId = "";
+            if (artifactType == ArtifactTypes.SEMANTIC_MODEL)
+            {
+                List<DatasetModel> datasets = GlobalHandler.GetModelByName(artifactName);
+                if (datasets.Count == 0)
+                    throw new Exception($"semantic model not found, please connect this semantic model");
+                if (datasets.Count > 1)
+                {
+                    string datasetInfos = string.Join("; ", datasets.Select(d =>
+                        $"Server: {d.ServerName}, Database: {d.DbName}, ConnectionType: {d.ConnectionType}"));
+
+                    throw new Exception($"There are more than one semantic model with the name '{artifactName}'. Models: {datasetInfos}");
+                }
+                artifactId = datasets[0].DatasetId;
+            }
+            else
+            {
+                List<ReportModel> reports = GlobalHandler.GetReportByName(artifactName);
+                if (reports.Count == 0)
+                    throw new Exception($"report not found, please connect this report");
+                if (reports.Count > 1)
+                {
+                    string reportPaths = string.Join(", ", reports.Select(r => r.ReportPath));
+                    throw new Exception($"There are more than one report with the name '{artifactName}'. Report paths: {reportPaths}");
+                }
+                artifactId = reports[0].ReportId;
+            }
+            string key = GlobalHandler.GetArtifactCacheKey(userEmail, "", artifactId);
             
             if (artifactType == ArtifactTypes.SEMANTIC_MODEL)
             {
@@ -216,8 +259,6 @@ namespace PowerBI_MCP.Service
                         continue;
                     }
 
-                    // var issues = GetSuppresedIssues(singleIssueRuleData.Issues, issueMetadata.Id);
-
                     dto.Data = singleIssueRuleData.Issues;
                     dto.IssueCount = singleIssueRuleData.Issues.Count;
                     dto.MaxIssuable = singleIssueRuleData.MaxIssuable ?? 0;
@@ -232,12 +273,18 @@ namespace PowerBI_MCP.Service
                 }
 
             }
-            // List<IssueRuleDataColumns> issuesDataCols = IssueMetadataRepo.Instance.GetIssueRulesColumns();
+
+            string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory);
+            Directory.CreateDirectory(extractionPath);
+            string filePath = Path.Combine(extractionPath, "insights.json");
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string json = System.Text.Json.JsonSerializer.Serialize(complianceRule, options);
+            File.WriteAllTextAsync(filePath, json);
+            Console.WriteLine($"JSON saved to: {filePath}");
 
             allIssueRuleData.IssueRules = complianceRule;
             allIssueRuleData.FailedIssueRules = failedComplianceRule;
             allIssueRuleData.DisabledIssueRules = disabledComplianceRule;
-            // allIssueRuleData.IssueRuleColumns = issuesDataCols;
 
             return allIssueRuleData;
         }

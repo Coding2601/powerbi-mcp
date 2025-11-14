@@ -6,6 +6,7 @@ using PowerBI_MCP.Utils;
 using Microsoft.AnalysisServices.Tabular;
 using System.Text.Json;
 using PowerBI_MCP.Utils.Cache;
+using PowerBI_MCP.Repositories;
 
 namespace PowerBI_MCP.Service
 {
@@ -64,6 +65,8 @@ namespace PowerBI_MCP.Service
                     Console.WriteLine($"writing report doc into cache {reportId}");
                     ReportCache.Set(reportId, reportDoc);
                 }
+
+                ArtifactRepo.Instance.SaveReportArtifact(reportId, reportName, reportPath, isPBIR);
                 
                 string filePath = Path.Combine(AppConfig.duplicateReportZipDirectory, reportId + ".json");
                 var options = new JsonSerializerOptions { WriteIndented = true };
@@ -128,6 +131,8 @@ namespace PowerBI_MCP.Service
                     Console.WriteLine($"writing model doc into cache {modelId}");
                     ModelCache.Set(modelId, modelDoc);
                 }
+
+                ArtifactRepo.Instance.SaveModelArtifact(modelId, modelName, ConnectionType.SASS, server);
 
                 string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory, modelId);
                 Directory.CreateDirectory(extractionPath);

@@ -558,7 +558,7 @@ namespace PowerBI_MCP.Handlers
 
         public static string GetArtifactCacheKey(string userEmail, string workspaceId, string artifactId)
         {
-            return $@"{userEmail}.{workspaceId}.{artifactId}";
+            return $@"{artifactId}";
         }
 
         public static string GetTraceName(string userEmail, string reportId)

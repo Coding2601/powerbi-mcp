@@ -7,7 +7,7 @@ namespace PowerBI_MCP.Interfaces
     {
         public Task<object> GetUnusedFieldData(string modelName, string reportName);
         public List<IssueSection> GetIssueSection();
-        public object GetAlignmentIssues(string workspaceId, string artifactId, string? spacing, string userEmail);
-        public AllIssueRuleData GetData(string workspaceId, string artifactId, string artifactType, string userEmail);
+        public object GetAlignmentIssues(string artifactName, string? spacing, string userEmail);
+        public AllIssueRuleData GetData(string artifactName, string artifactType, string userEmail);
     }
 }
