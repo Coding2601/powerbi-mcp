@@ -21,6 +21,33 @@ namespace PowerBI_MCP.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetUnusedDetails([FromQuery] string modelName, [FromQuery] string reportName)
+        {
+            if (string.IsNullOrEmpty(modelName)) return BadRequest("Please provide a valid model name.");
+            if (string.IsNullOrEmpty(reportName)) return BadRequest("Please provide a valid report name.");
+
+            try
+            {
+                string userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "";
+                var data = await _issueService.GetUnusedFieldData(modelName, reportName);
+
+                if (data == null)
+                {
+                    return NotFound("No data found.");
+                }
+                return Ok(data);
+            }
+            catch (ErrorDTO err)
+            {
+                return CommonController.HandleException(err, User.FindFirst(ClaimTypes.Email)?.Value ?? "", err.Message, "Issue");
+            }
+            catch (Exception ex)
+            {
+                return CommonController.HandleException(ex, User.FindFirst(ClaimTypes.Email)?.Value ?? "", "An error occurred while fetching Issue data.", "Issue");
+            }
+        }
+
+        [HttpGet]
         public IActionResult GetIssuesSection()
         {
             try

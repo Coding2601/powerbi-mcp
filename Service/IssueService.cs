@@ -6,6 +6,7 @@ using PowerBI_MCP.Utils.Cache;
 using Newtonsoft.Json;
 using PowerBI_MCP.Interfaces;
 using PowerBI_MCP.Service.IssueDataGenerator;
+using PowerBI_MCP.Models;
 
 namespace PowerBI_MCP.Service
 {
@@ -15,93 +16,92 @@ namespace PowerBI_MCP.Service
         private Dictionary<string, Dictionary<string, string>>? calculatedColumns;
         public ModelDocumentation? modelDocumentation;
         public ReportDocumentation? reportDocumentation;
-        //public ILogger<IssueService> _logger;
 
         public List<IssueSection> GetIssueSection()
         {
             return IssueMetadataRepo.Instance.GetIssueSection();
         }
 
-        // public async Task<object> GetUnusedFieldData(int executionId, string userEmail)
-        // {
-        //     ExecutionResDTO? execution = await ExecutionRepo.GetExecutionByIdAsync(executionId);
-        //     if (execution == null)
-        //         throw new ErrorDTO("No execution is present for provided executionId.");
+        public async Task<object> GetUnusedFieldData(string modelName, string reportName)
+        {
+            List<DatasetModel> models = GlobalHandler.GetModelByName(modelName);
+            List<ReportModel> reports = GlobalHandler.GetReportByName(reportName);
+            if (reports.Count == 0) throw new ErrorDTO("No report found with the name " + reportName);
+            if (models.Count == 0) throw new ErrorDTO("No model found with the name " + modelName);
+            if (models.Count > 1) throw new ErrorDTO("Multiple models found with the name " + modelName + ". Please provide a unique model name.");
+            if (reports.Count > 1) throw new ErrorDTO("Multiple reports found with the name " + reportName + ". Please provide a unique report name.");
+            DatasetModel dataset = models[0];
+            ReportModel report = reports[0];
+            Dictionary<string, List<ReportModel>> datasetsToReports = new();
+            datasetsToReports.Add(dataset.DatasetId, new List<ReportModel> { report });
 
-        //     Dictionary<string, List<ExecutionArtifacts>> datasetsToReports = new();
-        //     Dictionary<string, string> dataSetWorkspaceId = new();
+            // foreach (var artifact in execution.ExecutionArtifacts)
+            // {
+            //     if (artifact.ArtifactType == ArtifactTypes.REPORT && artifact.ParentId != null)
+            //     {
+            //         if(datasetsToReports.ContainsKey(artifact.ParentId) == false) datasetsToReports.Add(artifact.ParentId, []);
+            //         datasetsToReports[artifact.ParentId].Add(artifact);
+            //     }
+            //     else if (artifact.ArtifactType == ArtifactTypes.SEMANTIC_MODEL)
+            //     {
+            //         if (!datasetsToReports.ContainsKey(artifact.ArtifactId))
+            //             datasetsToReports.Add(artifact.ArtifactId, []);
+            //     }
+            // }
 
-        //     foreach (var artifact in execution.ExecutionArtifacts)
-        //     {
-        //         if (artifact.ArtifactType == ArtifactTypes.REPORT && artifact.ParentId != null)
-        //         {
-        //             if(datasetsToReports.ContainsKey(artifact.ParentId) == false) datasetsToReports.Add(artifact.ParentId, []);
-        //             datasetsToReports[artifact.ParentId].Add(artifact);
-        //         }
-        //         else if (artifact.ArtifactType == ArtifactTypes.SEMANTIC_MODEL)
-        //         {
-        //             if (!datasetsToReports.ContainsKey(artifact.ArtifactId))
-        //                 datasetsToReports.Add(artifact.ArtifactId, []);
-        //             if (!dataSetWorkspaceId.ContainsKey(artifact.ArtifactId))
-        //                 dataSetWorkspaceId.Add(artifact.ArtifactId, artifact.WorkspaceId);
-        //         }
-        //     }
+            List<IssueRulesMetadata> issueRulesMetadata = IssueMetadataRepo.Instance.GetUnusedFieldRelatedIssueMetadata();
+            Dictionary<string, List<IssueRulesMetadataDTO>> result = new();
+            Dictionary<string, ModelDocumentation> modelDocs = new();
+            foreach (var datasetId in datasetsToReports.Keys)
+            {
+                if (dataset == null) continue;
+                string modelDocCacheId = datasetId;
+                ModelDocumentation? modelDoc = ModelCache.Get(modelDocCacheId);
+                if (modelDoc == null)
+                    throw new ErrorDTO("No Documentation found for Semantic model " + dataset.DatasetId);
 
-        //     List<IssueRulesMetadata> issueRulesMetadata = IssueMetadataRepo.Instance.GetUnusedFieldRelatedIssueMetadata();
-        //     Dictionary<string, List<IssueRulesMetadataDTO>> result = new();
-        //     Dictionary<string, ModelDocumentation> modelDocs = new();
-        //     foreach (var datasetId in datasetsToReports.Keys)
-        //     {
-        //         ExecutionArtifacts? dataset = execution.ExecutionArtifacts.Find(x => x.ArtifactId == datasetId);
-        //         if (dataset == null) continue;
-        //         string modelDocCacheId = GlobalHandler.GetArtifactCacheKey(userEmail, dataset.WorkspaceId, datasetId);
-        //         ModelDocumentation? modelDoc = ReportModelCache.Get(modelDocCacheId);
-        //         if (modelDoc == null) continue;
-        //         //throw new ErrorDTO("No Documentation found for Semantic model " + dataset.ArtifactId);
+                var associatedReports = datasetsToReports[datasetId];
+                List<ReportDocumentation> reportUIDocs = new();
+                foreach (var associatedReport in associatedReports)
+                {
+                    ReportDocumentation? reportDoc = ReportCache.Get(associatedReport.ReportId);
+                    if (reportDoc != null) reportUIDocs.Add(reportDoc);
+                }
 
-        //         var associatedReports = datasetsToReports[datasetId];
-        //         List<ReportDocumentation> reportUIDocs = new();
-        //         foreach (var report in associatedReports)
-        //         {
-        //             ReportDocumentation? reportDoc = ReportDocCache.Get(GlobalHandler.GetArtifactCacheKey(userEmail, report.WorkspaceId, report.ArtifactId));
-        //             if (reportDoc != null) reportUIDocs.Add(reportDoc);
-        //         }
-
-        //         // mark model fields used or usedInUnused and save back to cache
-        //         modelDoc = UnusedHandler.Handle(modelDoc, reportUIDocs);
-        //         ReportModelCache.Set(modelDocCacheId, modelDoc);
+                modelDoc = UnusedHandler.Handle(modelDoc, reportUIDocs);
+                ModelCache.Set(modelDocCacheId, modelDoc);
                 
-        //         List<IssueRulesMetadataDTO> issues = new();
+                List<IssueRulesMetadataDTO> issues = new();
 
-        //         foreach (var issueMetadata in issueRulesMetadata)
-        //         {
-        //             IssueRulesMetadataDTO dto = JsonConvert.DeserializeObject<IssueRulesMetadataDTO>(JsonConvert.SerializeObject(issueMetadata)) ?? new();
+                foreach (var issueMetadata in issueRulesMetadata)
+                {
+                    IssueRulesMetadataDTO dto = JsonConvert.DeserializeObject<IssueRulesMetadataDTO>(JsonConvert.SerializeObject(issueMetadata)) ?? new();
 
-        //             IArtifactGroupIssueGenerator issueGenerator = IssueDataGeneratorFactory.Instance.CreateArtifactGroupIssueGenerator(issueMetadata.DataGeneratorFunction);
-        //             //issueGenerator.SetAssociatedReportsUIDoc(reportUIDocs);
+                    IArtifactGroupIssueGenerator issueGenerator = IssueDataGeneratorFactory.Instance.CreateArtifactGroupIssueGenerator(issueMetadata.DataGeneratorFunction);
+                    //issueGenerator.SetAssociatedReportsUIDoc(reportUIDocs);
 
-        //             IssueContext issueContent = new()
-        //             {
-        //                 ModelDocumentation = modelDoc ?? new()
-        //             };
-        //             SingleIssueRuleData? singleIssueRuleData = issueGenerator.GetData(issueContent);
+                    IssueContext issueContent = new()
+                    {
+                        ModelDocumentation = modelDoc ?? new()
+                    };
+                    SingleIssueRuleData? singleIssueRuleData = issueGenerator.GetData(issueContent);
 
-        //             dto.Data = singleIssueRuleData?.Issues ?? [];
-        //             dto.IssueCount = (singleIssueRuleData?.Issues ?? []).Count;
-        //             dto.MaxIssuable = singleIssueRuleData?.MaxIssuable ?? 0;
-        //             issues.Add(dto);
-        //         }
-        //         result.Add(datasetId, issues);
-        //         var modelDocWithTableColAndMeas = new ModelDocumentation()
-        //         {
-        //             Tables = modelDoc?.Tables ?? [],
-        //             Columns  = modelDoc?.Columns ?? [],
-        //             Measures= modelDoc?.Measures ?? []
-        //         }; 
-        //         modelDocs.Add(datasetId, modelDocWithTableColAndMeas);
-        //     }
-        //     return new { dataSetWorkspaceId, result, modelDocs };
-        // }
+                    dto.Data = singleIssueRuleData?.Issues ?? [];
+                    dto.IssueCount = (singleIssueRuleData?.Issues ?? []).Count;
+                    dto.MaxIssuable = singleIssueRuleData?.MaxIssuable ?? 0;
+                    issues.Add(dto);
+                }
+                result.Add(datasetId, issues);
+                var modelDocWithTableColAndMeas = new ModelDocumentation()
+                {
+                    Tables = modelDoc?.Tables ?? [],
+                    Columns  = modelDoc?.Columns ?? [],
+                    Measures= modelDoc?.Measures ?? []
+                }; 
+                modelDocs.Add(datasetId, modelDocWithTableColAndMeas);
+            }
+            return new { result, modelDocs };
+        }
         
         public object GetAlignmentIssues(string workspaceId, string artifactId, string? spacing, string userEmail)
         {
@@ -241,23 +241,7 @@ namespace PowerBI_MCP.Service
 
             return allIssueRuleData;
         }
-
-        // public async Task AddToIgnoreList(List<AddToIgnoreList> suppresedIssues)
-        // {
-        //     await IgnoreListRepo.AddToIgnoreListAsync(suppresedIssues);
-        // }
-
-        // public List<IgnoreList> GetIgnoreItems(int insightId)
-        // {
-        //     List<IgnoreList> suppresedIssues = IgnoreListRepo.GetSuppresedIssues(insightId);
-        //     return suppresedIssues;
-        // }
-
-        // public async Task DeleteFromIgnoreList(List<int> suppresedRowIds)
-        // {
-        //     await IgnoreListRepo.DeleteFromIgnoreListAsync(suppresedRowIds); 
-        // }
-
+        
         // public FixedStatusResponseModel CheckFixedStatus(CheckFixedStatusReqModel request, string userEmail)
         // {
         //     var response = new FixedStatusResponseModel();
