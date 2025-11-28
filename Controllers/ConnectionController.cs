@@ -40,7 +40,7 @@ namespace PowerBI_MCP.Controllers
         public IActionResult ConnectToSASSModel([FromBody] ModelConnectionDTO args)
         {
             if (args == null)
-                return BadRequest("Model name and its path are required.");
+                return BadRequest("Model name is required.");
             else if (string.IsNullOrEmpty(args.ModelName))
                 return BadRequest("Model name cannot be empty.");
 

@@ -22,7 +22,7 @@ namespace PowerBI_MCP.Service
             if (reports.Count > 1)
             {
                 string reportPaths = string.Join(", ", reports.Select(r => r.ReportPath));
-                throw new Exception($"There are more than one report with the name '{reportName}'. Report paths: {reportPaths}");
+                throw new Exception($"There already exists a report with the name '{reportName}");
             }
             ReportModel report = reports[0];
             if (ReportCache.Get(report.ReportId) != null)
@@ -43,10 +43,7 @@ namespace PowerBI_MCP.Service
                 throw new Exception($"semantic model not found, please connect this semantic model");
             if (datasets.Count > 1)
             {
-                string datasetInfos = string.Join("; ", datasets.Select(d => 
-                    $"Server: {d.ServerName}, Database: {d.DbName}, ConnectionType: {d.ConnectionType}"));
-                
-                throw new Exception($"There are more than one semantic model with the name '{modelName}'. Models: {datasetInfos}");
+                throw new Exception($"There already exists a semantic model with the name '{modelName}'");
             }
             DatasetModel dataset = datasets[0];
             if (ModelCache.Get(dataset.DatasetId) != null)

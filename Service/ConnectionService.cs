@@ -32,17 +32,19 @@ namespace PowerBI_MCP.Service
             {
                 string fullpath = Path.Combine(reportPath, reportName);
 
-                if (GlobalHandler.IsArtifactAvailable(reportName, fullpath))
-                    return true;
+                if (ArtifactRepo.Instance.CheckReportArtifactExists(reportName))
+                {
+                    throw new Exception($"The report '{reportName}' has already been connected.");
+                }
 
                 if (!_fileHandler.CheckFileExists(fullpath))
                     throw new Exception("REPORT_FILE_NOT_FOUND");
 
                 string reportId = "";
-                while (!GlobalHandler.CheckArtifactExistsById(reportId) && reportId == "")
+                while (!ArtifactRepo.Instance.CheckArtifactExistsById(reportId, true) && reportId == "")
                     reportId = Guid.NewGuid().ToString();
 
-                string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory, reportId);
+                string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory, reportId, "zipContent");
                 Directory.CreateDirectory(extractionPath);
 
                 _fileHandler.ExtractZipFile(fullpath, extractionPath);
@@ -59,19 +61,20 @@ namespace PowerBI_MCP.Service
                     ReportType = isPBIR ? ReportType.PBIR : ReportType.PBIX
                 });
                 
-                ReportDocumentation reportDoc = _documentationHandler.GenerateReportDocumentation(isPBIR, extractionPath, reportId);
+                ReportDocumentation? reportDoc = _documentationHandler.GenerateReportDocumentation(isPBIR, extractionPath, reportId);
                 if (reportDoc != null)
                 {
                     Console.WriteLine($"writing report doc into cache {reportId}");
                     ReportCache.Set(reportId, reportDoc);
                 }
 
-                ArtifactRepo.Instance.SaveReportArtifact(reportId, reportName, reportPath, isPBIR);
-                
-                string filePath = Path.Combine(AppConfig.duplicateReportZipDirectory, reportId + ".json");
+                string filePath = Path.Combine(AppConfig.duplicateReportZipDirectory, reportId, "documentation.json");
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = System.Text.Json.JsonSerializer.Serialize(reportDoc, options);
                 File.WriteAllTextAsync(filePath, json);
+             
+                ArtifactRepo.Instance.SaveReportArtifact(reportId, reportName, reportPath, filePath, isPBIR);
+                
                 Console.WriteLine($"JSON saved to: {filePath}");
                 
                 return true;
@@ -89,8 +92,8 @@ namespace PowerBI_MCP.Service
             {
                 string server = _connectionHandler.GetServer(modelName);
 
-                if(GlobalHandler.IsArtifactAvailable(server, ""))
-                    return true;
+                if(ArtifactRepo.Instance.CheckModelArtifactExists(modelName))
+                    throw new Exception($"The model '{modelName}' has already been connected.");
 
                 Microsoft.AnalysisServices.Server tabularServer = new();
                 tabularServer.Connect(server);
@@ -113,7 +116,7 @@ namespace PowerBI_MCP.Service
                 Database database = server1.Databases.GetByName(db);
 
                 string modelId = "";
-                while (!GlobalHandler.CheckArtifactExistsById(modelId) && modelId == "")
+                while (!ArtifactRepo.Instance.CheckArtifactExistsById(modelId, true) && modelId == "")
                     modelId = Guid.NewGuid().ToString();
                 ArtifactModel.Datasets.Add(new DatasetModel
                 {
@@ -132,14 +135,15 @@ namespace PowerBI_MCP.Service
                     ModelCache.Set(modelId, modelDoc);
                 }
 
-                ArtifactRepo.Instance.SaveModelArtifact(modelId, modelName, ConnectionType.SASS, server);
-
-                string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory, modelId);
+                string extractionPath = Path.Combine(AppConfig.duplicateReportModelZipDirectory, modelId);
                 Directory.CreateDirectory(extractionPath);
-                string filePath = Path.Combine(extractionPath, modelId + ".json");
+                string filePath = Path.Combine(extractionPath, "documentation.json");
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string json = System.Text.Json.JsonSerializer.Serialize(modelDoc, options);
                 File.WriteAllTextAsync(filePath, json);
+
+                ArtifactRepo.Instance.SaveModelArtifact(modelId, filePath, modelName, ConnectionType.SASS, server);
+
                 Console.WriteLine($"JSON saved to: {filePath}");
                 
                 return true;

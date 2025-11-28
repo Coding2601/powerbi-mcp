@@ -56,24 +56,24 @@ namespace PowerBI_MCP.Handlers
             }
         }
 
-        public static bool CheckArtifactExistsById(string artifactId)
-        {
-            var inReport = ArtifactModel.Reports.Any(report =>
-                report.ReportId.Equals(artifactId, StringComparison.OrdinalIgnoreCase));
-            var inDataset = ArtifactModel.Datasets.Any(dataset =>
-                dataset.DatasetId.Equals(artifactId, StringComparison.OrdinalIgnoreCase));
-            return inReport || inDataset;
-        }
+        // public static bool CheckArtifactExistsById(string artifactId)
+        // {
+        //     var inReport = ArtifactModel.Reports.Any(report =>
+        //         report.ReportId.Equals(artifactId, StringComparison.OrdinalIgnoreCase));
+        //     var inDataset = ArtifactModel.Datasets.Any(dataset =>
+        //         dataset.DatasetId.Equals(artifactId, StringComparison.OrdinalIgnoreCase));
+        //     return inReport || inDataset;
+        // }
         
-        public static bool IsArtifactAvailable(string artifactName, string artifactPath)
-        {
-            var inReport = ArtifactModel.Reports.Any(report =>
-                report.ReportName.Equals(artifactName, StringComparison.OrdinalIgnoreCase) &&
-                report.ReportPath.Equals(artifactPath, StringComparison.OrdinalIgnoreCase));
-            var inDataset = ArtifactModel.Datasets.Any(dataset =>
-                dataset.ServerName.Equals(artifactName, StringComparison.OrdinalIgnoreCase));
-            return inReport || inDataset;
-        }
+        // public static bool IsArtifactAvailable(string artifactName, string artifactPath)
+        // {
+        //     var inReport = ArtifactModel.Reports.Any(report =>
+        //         report.ReportName.Equals(artifactName, StringComparison.OrdinalIgnoreCase) &&
+        //         report.ReportPath.Equals(artifactPath, StringComparison.OrdinalIgnoreCase));
+        //     var inDataset = ArtifactModel.Datasets.Any(dataset =>
+        //         dataset.ServerName.Equals(artifactName, StringComparison.OrdinalIgnoreCase));
+        //     return inReport || inDataset;
+        // }
 
         /// <summary>
         /// Reads a JSON file and returns its content as a JObject.

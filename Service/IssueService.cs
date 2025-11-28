@@ -30,8 +30,8 @@ namespace PowerBI_MCP.Service
             List<ReportModel> reports = GlobalHandler.GetReportByName(reportName);
             if (reports.Count == 0) throw new ErrorDTO("No report found with the name " + reportName);
             if (models.Count == 0) throw new ErrorDTO("No model found with the name " + modelName);
-            if (models.Count > 1) throw new ErrorDTO("Multiple models found with the name " + modelName + ". Please provide a unique model name.");
-            if (reports.Count > 1) throw new ErrorDTO("Multiple reports found with the name " + reportName + ". Please provide a unique report name.");
+            if (models.Count > 1) throw new ErrorDTO("There already exists a semantic model with the name '" + modelName + "'");
+            if (reports.Count > 1) throw new ErrorDTO("There already exists a report with the name '" + reportName + "'");
             DatasetModel dataset = models[0];
             ReportModel report = reports[0];
             Dictionary<string, List<ReportModel>> datasetsToReports = new();
@@ -116,8 +116,7 @@ namespace PowerBI_MCP.Service
                 throw new Exception($"report not found, please connect this report");
             if (reports.Count > 1)
             {
-                string reportPaths = string.Join(", ", reports.Select(r => r.ReportPath));
-                throw new Exception($"There are more than one report with the name '{reportName}'. Report paths: {reportPaths}");
+                throw new Exception($"There already exists a report with the name '{reportName}'");
             }
             artifactId = reports[0].ReportId;
             ReportDocumentation? reportDoc = ReportCache.Get(GlobalHandler.GetArtifactCacheKey(userEmail, workspaceId.ToString(), artifactId));
@@ -147,7 +146,7 @@ namespace PowerBI_MCP.Service
                 dto.MaxIssuable = singleIssueRuleData?.MaxIssuable ?? 0;
                 issues.Add(dto);
             }
-            string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory);
+            string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory, artifactId);
             Directory.CreateDirectory(extractionPath);
             string filePath = Path.Combine(extractionPath, "alignment.json");
             var options = new JsonSerializerOptions { WriteIndented = true };
@@ -167,10 +166,7 @@ namespace PowerBI_MCP.Service
                     throw new Exception($"semantic model not found, please connect this semantic model");
                 if (datasets.Count > 1)
                 {
-                    string datasetInfos = string.Join("; ", datasets.Select(d =>
-                        $"Server: {d.ServerName}, Database: {d.DbName}, ConnectionType: {d.ConnectionType}"));
-
-                    throw new Exception($"There are more than one semantic model with the name '{artifactName}'. Models: {datasetInfos}");
+                    throw new Exception($"There already exists a semantic model with the name '{artifactName}'");
                 }
                 artifactId = datasets[0].DatasetId;
             }
@@ -182,7 +178,7 @@ namespace PowerBI_MCP.Service
                 if (reports.Count > 1)
                 {
                     string reportPaths = string.Join(", ", reports.Select(r => r.ReportPath));
-                    throw new Exception($"There are more than one report with the name '{artifactName}'. Report paths: {reportPaths}");
+                    throw new Exception($"There already exists a report with the name '{artifactName}'. Report paths: {reportPaths}");
                 }
                 artifactId = reports[0].ReportId;
             }
@@ -277,7 +273,11 @@ namespace PowerBI_MCP.Service
 
             }
 
-            string extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory);
+            string extractionPath = "";
+            if (artifactType == ArtifactTypes.REPORT)
+                extractionPath = Path.Combine(AppConfig.duplicateReportZipDirectory, artifactId);
+            else
+                extractionPath = Path.Combine(AppConfig.duplicateReportModelZipDirectory, artifactId);
             Directory.CreateDirectory(extractionPath);
             string filePath = Path.Combine(extractionPath, "insights.json");
             var options = new JsonSerializerOptions { WriteIndented = true };

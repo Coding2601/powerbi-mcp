@@ -8,6 +8,36 @@ namespace PowerBI_MCP.Handlers
     {
         private static readonly string _connectionString = AppConfig.ConnectionString;
 
+        public static int RunCountQuery(string query)
+        {
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+
+                using var command = new SqliteCommand(query, connection);
+                var result = command.ExecuteScalar();
+
+                if (result != null && int.TryParse(result.ToString(), out int count))
+                {
+                    return count;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed Query:\n" + query);
+                GlobalHandler.WriteCrashLog(
+                    "Failed Query:\n" + query + "\n" + ex.ToString(),
+                    null,
+                    "SQLite Count Function Failure"
+                );
+                return -1;
+            }
+        }
         public static JArray? RunReadQuery(string query)
         {
             try
@@ -50,7 +80,6 @@ namespace PowerBI_MCP.Handlers
                 return null;
             }
         }
-
         public static bool CheckTableExists(string tableName)
         {
             using (var connection = new SqliteConnection(_connectionString))
@@ -78,7 +107,6 @@ namespace PowerBI_MCP.Handlers
                 }
             }
         }
-
         public static int RunCreateQuery(string query)
         {
             try
@@ -102,7 +130,6 @@ namespace PowerBI_MCP.Handlers
                 return -1;
             }
         }
-    
         public static int RunInsertQuery(string query)
         {
             try

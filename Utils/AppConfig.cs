@@ -6,25 +6,24 @@ namespace PowerBI_MCP.Utils
         private static readonly string RoamingDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         public static string LocalDir { get; } = RoamingDir + "\\" + Constants.ROOT_DIR;
         public static string duplicateReportZipDirectory { get; } = RoamingDir + "\\" + Constants.ROOT_DIR + "\\reports";
-        
+        public static string ConnectionString { get; } = $"Data Source={RoamingDir}\\{Constants.ROOT_DIR}\\{Constants.DB_NAME};Mode=ReadWriteCreate;";
+        public static string InsightsMetadataJsonFile { get; } = RoamingDir + $"\\{Constants.ROOT_DIR}\\insightsMetadata.json";
+        public static string CertyFastDBFilePath { get; } = LocalDir + $"\\databases\\{Constants.DB_NAME}";
+
         // public static string SuppressedInsightsFilesDirectory { get; } = RoamingDir + "\\" + Constants.ROOT_DIR + "\\suppressedInsights";
         // public static string SuppressedKeyJoinStr = "_SUPPRESSED_KEY_JOIN_";
         // public static string IssueRowIgnoreKeyJoinSeparator = "__|__Issue_Row_Ignore_Join_Separator__|__";
         // public static string whizUpdaterDirectory { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "certy-fast-updater");
+
         public static string ModelBimDirectory { get; } = RoamingDir + "\\" + Constants.ROOT_DIR + "\\modelBim";
         public static string duplicateReportModelZipDirectory { get; } = RoamingDir + "\\" + Constants.ROOT_DIR + "\\datasets";
         public static string crashLog { get; } = RoamingDir + "\\"+ Constants.ROOT_DIR +"\\CrashLog.txt";
-        public static string ConnectionString { get; } = $"Data Source={RoamingDir}\\{Constants.ROOT_DIR}\\{Constants.DB_NAME};Mode=ReadWriteCreate;";
-        public static string localCacheDir1 { get; } = RoamingDir + "\\certy-fast\\Cache";
+        public static string localCacheDir1 { get; } = RoamingDir + "\\" + Constants.ROOT_DIR + "\\Cache";
         public static string localCacheDir2 { get; } = RoamingDir + "\\certy-fast\\Code Cache";
         public static string ignoreList { get; } = RoamingDir + "\\certy-fast\\SpellCheckIgnore.txt";
-
         public static string licenseKey { get; } = RoamingDir + "\\certy-fast\\License.txt";
         public static string WhizUserDataJsonFile { get; } = RoamingDir + "\\certy-fast\\userData.json";
-        public static string InsightsMetadataJsonFile { get; } = RoamingDir + "\\certy-fast\\insightsMetadata.json";
         public static string UserRulesKeysForSuppressionJsonFile { get; } = RoamingDir + "\\certy-fast\\keysForSuppression.json";
-
-        public static string CertyFastDBFilePath { get; } = LocalDir + "\\databases\\CertyfastDB.sqlite";
         public static string CertyFASTApplicationPath = @"C:\Program Files\CertyFAST\CertyFAST.exe";
 
         public static readonly Dictionary<string, HashSet<string>> visualFormatType = new()
