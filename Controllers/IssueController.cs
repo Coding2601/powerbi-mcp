@@ -21,14 +21,14 @@ namespace PowerBI_MCP.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUnusedDetails([FromQuery] string modelName, [FromQuery] string reportName)
+        public async Task<IActionResult> GetUnusedDetails([FromQuery] string modelName, string reportName)
         {
             if (string.IsNullOrEmpty(modelName)) return BadRequest("Please provide a valid model name.");
             if (string.IsNullOrEmpty(reportName)) return BadRequest("Please provide a valid report name.");
 
             try
             {
-                string userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "";
+                Console.WriteLine("Fetching unused details for model: " + modelName + ", report: " + reportName);
                 var data = await _issueService.GetUnusedFieldData(modelName, reportName);
 
                 if (data == null)

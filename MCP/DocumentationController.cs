@@ -35,7 +35,7 @@ namespace PowerBI_MCP.MCP
         [HttpGet]
         [McpServerTool]
         [Description("Fetches detailed documentation for a specific Power BI report by name.")]
-        public IActionResult GetReportDocumentation([FromQuery, Description("Exact name of the Power BI report.")] string reportName)
+        public IActionResult MCP_GetReportDocumentation([FromQuery, Description("Exact name of the Power BI report.")] string reportName)
         {
             if (string.IsNullOrEmpty(reportName))
                 return BadRequest("Please input report name.");
@@ -64,7 +64,7 @@ namespace PowerBI_MCP.MCP
         [HttpGet]
         [McpServerTool]
         [Description("Fetches detailed documentation for a specific Power BI semantic model (dataset) by name.")]
-        public IActionResult GetModelDocumentation([FromQuery, Description("Exact name of the Power BI semantic model (dataset).")] string modelName)
+        public IActionResult MCP_GetModelDocumentation([FromQuery, Description("Exact name of the Power BI semantic model (dataset).")] string modelName)
         {
             if (string.IsNullOrEmpty(modelName))
                 return BadRequest("Please input model name.");

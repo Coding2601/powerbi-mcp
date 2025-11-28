@@ -37,6 +37,9 @@ namespace PowerBI_MCP.Service
             Dictionary<string, List<ReportModel>> datasetsToReports = new();
             datasetsToReports.Add(dataset.DatasetId, new List<ReportModel> { report });
 
+            Console.WriteLine("Dataset ID: " + dataset.DatasetId);
+            Console.WriteLine("Report ID: " + report.ReportId);
+
             // foreach (var artifact in execution.ExecutionArtifacts)
             // {
             //     if (artifact.ArtifactType == ArtifactTypes.REPORT && artifact.ParentId != null)

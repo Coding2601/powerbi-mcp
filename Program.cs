@@ -19,9 +19,10 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<IDocumentationService, DocumentationService>();
 builder.Services.AddScoped<IConnectionService, ConnectionService>();
 builder.Services.AddScoped<IIssueService, IssueService>();
-builder.Services.AddScoped<DocumentationHandler>();
+builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<ConnectionHandler>();
 builder.Services.AddScoped<FileHandler>();
+builder.Services.AddScoped<UnusedHandler>();
 builder.Services.AddScoped<DocumentationHandler>();
 builder.Services.AddScoped<ComplianceHandler>();
 
@@ -78,10 +79,11 @@ app.Run();
 // builder.Services.AddScoped<IDocumentationService, DocumentationService>();
 // builder.Services.AddScoped<IConnectionService, ConnectionService>();
 // builder.Services.AddScoped<IIssueService, IssueService>();
-// builder.Services.AddScoped<DocumentationHandler>();
 // builder.Services.AddScoped<ConnectionHandler>();
 // builder.Services.AddScoped<FileHandler>();
+// builder.Services.AddScoped<UnusedHandler>();
 // builder.Services.AddScoped<DocumentationHandler>();
+// builder.Services.AddScoped<ComplianceHandler>();
 
 // builder.Services.AddMcpServer().WithStdioServerTransport().WithToolsFromAssembly();
 

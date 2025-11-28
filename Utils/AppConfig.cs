@@ -4,16 +4,17 @@ namespace PowerBI_MCP.Utils
     {
         public static ConfigurationManager configuration { get; set; } = new ConfigurationManager();
         private static readonly string RoamingDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        public static string LocalDir { get; } = RoamingDir + "\\certy-fast";
-        public static string duplicateReportZipDirectory { get; } = RoamingDir + "\\certy-fast\\reportZIP";
-        public static string SuppressedInsightsFilesDirectory { get; } = RoamingDir + "\\certy-fast\\suppressedInsights";
-        public static string SuppressedKeyJoinStr = "_SUPPRESSED_KEY_JOIN_";
-        public static string IssueRowIgnoreKeyJoinSeparator = "__|__Issue_Row_Ignore_Join_Separator__|__";
-        public static string ModelBimDirectory { get; } = RoamingDir + "\\certy-fast\\modelBim";
-        public static string duplicateReportModelZipDirectory { get; } = RoamingDir + "\\certy-fast\\modelZIP";
-        public static string crashLog { get; } = RoamingDir + "\\certy-fast\\CrashLog.txt";
-        public static string ConnectionString { get; } = $"Data Source={RoamingDir}\\certy-fast\\database.sqlite;Mode=ReadWriteCreate;";
-        public static string whizUpdaterDirectory { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "certy-fast-updater");
+        public static string LocalDir { get; } = RoamingDir + "\\" + Constants.ROOT_DIR;
+        public static string duplicateReportZipDirectory { get; } = RoamingDir + "\\" + Constants.ROOT_DIR + "\\reports";
+        
+        // public static string SuppressedInsightsFilesDirectory { get; } = RoamingDir + "\\" + Constants.ROOT_DIR + "\\suppressedInsights";
+        // public static string SuppressedKeyJoinStr = "_SUPPRESSED_KEY_JOIN_";
+        // public static string IssueRowIgnoreKeyJoinSeparator = "__|__Issue_Row_Ignore_Join_Separator__|__";
+        // public static string whizUpdaterDirectory { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "certy-fast-updater");
+        public static string ModelBimDirectory { get; } = RoamingDir + "\\" + Constants.ROOT_DIR + "\\modelBim";
+        public static string duplicateReportModelZipDirectory { get; } = RoamingDir + "\\" + Constants.ROOT_DIR + "\\datasets";
+        public static string crashLog { get; } = RoamingDir + "\\"+ Constants.ROOT_DIR +"\\CrashLog.txt";
+        public static string ConnectionString { get; } = $"Data Source={RoamingDir}\\{Constants.ROOT_DIR}\\{Constants.DB_NAME};Mode=ReadWriteCreate;";
         public static string localCacheDir1 { get; } = RoamingDir + "\\certy-fast\\Cache";
         public static string localCacheDir2 { get; } = RoamingDir + "\\certy-fast\\Code Cache";
         public static string ignoreList { get; } = RoamingDir + "\\certy-fast\\SpellCheckIgnore.txt";
