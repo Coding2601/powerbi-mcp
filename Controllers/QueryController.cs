@@ -7,10 +7,10 @@ namespace PowerBI_MCP.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    public class DaxController : ControllerBase
+    public class QueryController : ControllerBase
     {
         private readonly IDaxService _daxService;
-        public DaxController(IDaxService daxService)
+        public QueryController(IDaxService daxService)
         {
             _daxService = daxService;
         }
