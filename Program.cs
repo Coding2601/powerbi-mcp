@@ -20,11 +20,13 @@ builder.Services.AddScoped<IDocumentationService, DocumentationService>();
 builder.Services.AddScoped<IConnectionService, ConnectionService>();
 builder.Services.AddScoped<IIssueService, IssueService>();
 builder.Services.AddScoped<IExportService, ExportService>();
+builder.Services.AddScoped<IDaxService, DaxService>();
 builder.Services.AddScoped<ConnectionHandler>();
 builder.Services.AddScoped<FileHandler>();
 builder.Services.AddScoped<UnusedHandler>();
 builder.Services.AddScoped<DocumentationHandler>();
 builder.Services.AddScoped<ComplianceHandler>();
+builder.Services.AddScoped<DaxHandler>();
 
 builder.Services.AddAuthentication("DefaultScheme")
     .AddScheme<AuthenticationSchemeOptions, DummyAuthHandler>("DefaultScheme", null);

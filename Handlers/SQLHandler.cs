@@ -153,5 +153,28 @@ namespace PowerBI_MCP.Handlers
                 return -1;
             }
         }
+        public static string RunSelectSingleValueQuery(string query)
+        {
+            try
+            {
+                using var connection = new SqliteConnection(_connectionString);
+                connection.Open();
+
+                using var command = new SqliteCommand(query, connection);
+                var result = command.ExecuteScalar();
+
+                return result?.ToString() ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed Query:\n" + query);
+                GlobalHandler.WriteCrashLog(
+                    "Failed Query:\n" + query + "\n" + ex.ToString(),
+                    null,
+                    "SQLite Select Single Value Function Failure"
+                );
+                return string.Empty;
+            }
+        }
     }
 }
