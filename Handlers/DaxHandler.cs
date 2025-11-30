@@ -11,6 +11,20 @@ namespace PowerBI_MCP.Handlers
 {
     public class DaxHandler
     {
+        public string SaveDaxQueryToFile(string queryName, string query)
+        {
+            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string saveDirectory = Path.Combine(documentsPath, "PowerBI-MCP", "SavedQueries");
+            
+            if (!Directory.Exists(saveDirectory))
+                Directory.CreateDirectory(saveDirectory);
+
+            string sanitizedQueryName = string.Join("_", queryName.Split(Path.GetInvalidFileNameChars()));
+            string filePath = Path.Combine(saveDirectory, $"{sanitizedQueryName}.dax");
+
+            File.WriteAllText(filePath, query);
+            return $"Query saved successfully at: {filePath}";
+        }
         public string ExecuteQuery(string query, string modelName, string queryType)
         {
             string serverName = ModelRepo.Instance.GetServerName(modelName);

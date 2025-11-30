@@ -34,5 +34,20 @@ namespace PowerBI_MCP.Controllers
             var result = _daxService.RunMdxQuery(mdxRequest.Query, mdxRequest.ModelName);
             return Ok(result);
         }
+    
+        [HttpPost]
+        public IActionResult SaveDaxQuery(SaveDaxDTO saveDaxRequest)
+        {
+            if (saveDaxRequest == null)
+            {
+                return BadRequest("Invalid request data.");
+            }
+            if (string.IsNullOrEmpty(saveDaxRequest.Query) || string.IsNullOrEmpty(saveDaxRequest.QueryName))
+            {
+                return BadRequest("Query and QueryName cannot be empty.");
+            }
+            var result = _daxService.SaveDaxQuery(saveDaxRequest.QueryName, saveDaxRequest.Query);
+            return Ok(result);
+        }
     }
 }

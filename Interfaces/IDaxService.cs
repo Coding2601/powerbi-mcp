@@ -4,5 +4,6 @@ namespace PowerBI_MCP.Interfaces
     {
         public string RunDaxQuery(string Query, string ModelName);
         public string RunMdxQuery(string Query, string ModelName);
+        public string SaveDaxQuery(string QueryName, string Query);
     }
 }

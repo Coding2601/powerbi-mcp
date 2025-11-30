@@ -9,4 +9,9 @@ namespace PowerBI_MCP.DTO{
         public string Query { get; set; } = "";
         public string ModelName { get; set; } = "";
     }
+    public class SaveDaxDTO
+    {
+        public string Query { get; set; } = "";
+        public string QueryName { get; set; } = "";
+    }
 }

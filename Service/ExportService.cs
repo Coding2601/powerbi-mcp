@@ -21,7 +21,8 @@ namespace PowerBI_MCP.Service
 
         public async Task ExportToExcel(ReportModel report, DatasetModel model, List<string> exportAreas)
         {
-            string basePath = Path.Combine("C:\\Users\\Ravi Mishra\\OneDrive\\Documents\\powerbi-mcp", $"{SanitizeName(model.DatasetName)}_Excel");
+            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string basePath = Path.Combine(documentsPath, "PowerBI-MCP", $"{SanitizeName(model.DatasetName)}_Excel");
             string zipPath = $"{basePath}.zip";
             Directory.CreateDirectory(basePath);
 
